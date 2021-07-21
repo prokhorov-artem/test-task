@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  db:
+    image: postgres
+    container_name: test-task-postgres-container
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+  backend:
+    image: ${image}
+    network_mode: "host"
+    container_name: test-task-backend-container
+    ports:
+      - 8070:8070
