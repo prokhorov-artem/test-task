@@ -22,7 +22,7 @@ Expected results:
 mvn package "-Dimage=<MY IMAGE>"
 ```
 
-3. Create `.env` file in the root of the project and write down:
+3. Write down a container image in the `.env` file:
 ```
 image=<MY IMAGE>
 ```
@@ -33,6 +33,6 @@ docker-compose up
 ```
 
 ### Examples of input and output
-![img.png](img.png)
-![img_2.png](img_2.png)
-![img_3.png](img_3.png)
+![img.png](img/img.png)
+![img_2.png](img/img_2.png)
+![img_3.png](img/img_3.png)

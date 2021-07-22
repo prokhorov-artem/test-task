@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import ru.noveogroup.demo.repository.RelationshipRepository;
 import ru.noveogroup.demo.service.PersonService;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PersonServiceImpl implements PersonService {
 
@@ -28,6 +30,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Transactional(readOnly = true)
     public PersonDto findById(Long id) {
+        log.info("Trying to find person with id: {}", id);
         Optional<Person> optionalPerson = personRepository.findById(id);
         if (!optionalPerson.isPresent()) {
             return null;
@@ -35,6 +38,7 @@ public class PersonServiceImpl implements PersonService {
         Person person = optionalPerson.get();
         PersonDto personDto = conversionService.convert(person, PersonDto.class);
         if (personDto != null) {
+            log.info("Trying to find all relations for person with id: {}", id);
             relationshipRepository.findAllByRelationFromId(person.getId()).forEach(relationship -> {
                 if (relationship.getRelationType() == RelationType.SPOUSE) {
                     personDto.setSpouse(conversionService.convert(relationship.getRelationTo(),
@@ -50,6 +54,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Transactional
     public Long addPerson(PersonDto personDto) {
+        log.info("Trying to add person with data: {}", personDto);
         Person person = conversionService.convert(personDto, Person.class);
         if (person == null) {
             return null;
@@ -58,6 +63,7 @@ public class PersonServiceImpl implements PersonService {
         if (personDto.getParents() == null) {
             return person.getId();
         }
+        log.info("Trying to find person's parents and save info to relationship table");
         List<Relationship> relationships = personDto.getParents().stream()
             .map(relatedPersonDto -> conversionService.convert(relatedPersonDto, Person.class))
             .map(parent -> Relationship.builder()
@@ -72,6 +78,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Transactional
     public void addMarriage(MarriageDto marriageDto) {
+        log.info("Trying to find spouses and save info to relationship table");
         Person firstPerson = Person.builder()
             .id(marriageDto.getFirstPerson())
             .build();

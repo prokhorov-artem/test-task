@@ -1,8 +1,8 @@
 version: "3.7"
 services:
-  db:
+  postgres:
     image: postgres
-    container_name: test-task-postgres-container
+    container_name: postgres
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
@@ -15,3 +15,8 @@ services:
     container_name: test-task-backend-container
     ports:
       - 8070:8070
+    depends_on:
+      - postgres
+    command: sh -c ./docker-compose-wait/wait
+    environment:
+      WAIT_HOSTS: postgres:5432

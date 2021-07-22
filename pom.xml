@@ -78,12 +78,21 @@
 					<to>
 						<image>${image}</image>
 					</to>
+					<extraDirectories>
+						<paths>docker-compose-wait</paths>
+						<permissions>
+							<permission>
+								<file>docker-compose-wait/wait</file>
+								<mode>755</mode>
+							</permission>
+						</permissions>
+					</extraDirectories>
 				</configuration>
 				<executions>
 					<execution>
 						<phase>package</phase>
 						<goals>
-							<goal>build</goal>
+							<goal>dockerBuild</goal>
 						</goals>
 					</execution>
 				</executions>

@@ -20,6 +20,7 @@ import ru.noveogroup.demo.model.entity.Person;
 import ru.noveogroup.demo.model.entity.Relationship;
 import ru.noveogroup.demo.repository.PersonRepository;
 import ru.noveogroup.demo.repository.RelationshipRepository;
+import ru.noveogroup.demo.service.DateService;
 import ru.noveogroup.demo.service.PersonService;
 
 @SpringBootTest(classes = {TestTaskApplication.class, H2JpaConfig.class})
@@ -37,6 +38,9 @@ public class PersonServiceTest {
 
     @Autowired
     private ConversionService conversionService;
+
+    @Autowired
+    private DateService dateService;
 
     private Long personId;
     private Long firstParentId;
@@ -147,8 +151,15 @@ public class PersonServiceTest {
             .build();
 
         long before = personRepository.count();
-        Assertions.assertNotNull(personService.addPerson(personWithParents));
+        Long addedPersonId = personService.addPerson(personWithParents);
+        Assertions.assertNotNull(addedPersonId);
         Assertions.assertEquals(before + 1, personRepository.count());
+
+        personRepository.findById(addedPersonId).ifPresent(person -> {
+            Assertions.assertEquals(personWithParents.getName(), person.getName());
+            Assertions.assertEquals(personWithParents.getBirthPlace(), person.getBirthPlace());
+            Assertions.assertEquals(personWithParents.getBirthDate(), person.getBirthDate());
+        });
 
         PersonDto personWithoutParents = PersonDto.builder()
             .name("person")
@@ -158,8 +169,15 @@ public class PersonServiceTest {
             .build();
 
         before = personRepository.count();
-        Assertions.assertNotNull(personService.addPerson(personWithoutParents));
+        Long addedPersonWithoutParents = personService.addPerson(personWithoutParents);
+        Assertions.assertNotNull(addedPersonWithoutParents);
         Assertions.assertEquals(before + 1, personRepository.count());
+
+        personRepository.findById(addedPersonWithoutParents).ifPresent(person -> {
+            Assertions.assertEquals(personWithoutParents.getName(), person.getName());
+            Assertions.assertEquals(personWithoutParents.getBirthPlace(), person.getBirthPlace());
+            Assertions.assertEquals(personWithoutParents.getBirthDate(), person.getBirthDate());
+        });
     }
 
     @Test
