@@ -9,5 +9,5 @@ public interface PersonService {
 
     Long addPerson(PersonDto personDto);
 
-    void addMarriage(MarriageDto marriageDto);
+    boolean addMarriage(MarriageDto marriageDto);
 }

@@ -77,8 +77,14 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Transactional
-    public void addMarriage(MarriageDto marriageDto) {
+    public synchronized boolean addMarriage(MarriageDto marriageDto) {
         log.info("Trying to find spouses and save info to relationship table");
+        if (relationshipRepository
+            .existsByRelationFromIdAndRelationTypeEquals(marriageDto.getFirstPerson(), RelationType.SPOUSE) ||
+            relationshipRepository
+                .existsByRelationFromIdAndRelationTypeEquals(marriageDto.getSecondPerson(), RelationType.SPOUSE)) {
+            return false;
+        }
         Person firstPerson = Person.builder()
             .id(marriageDto.getFirstPerson())
             .build();
@@ -97,5 +103,6 @@ public class PersonServiceImpl implements PersonService {
             .relationTo(firstPerson)
             .build());
         relationshipRepository.saveAll(relationships);
+        return true;
     }
 }

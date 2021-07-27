@@ -9,6 +9,5 @@ public interface RelationshipRepository extends JpaRepository<Relationship, Long
 
     List<Relationship> findAllByRelationFromId(Long relationFrom);
 
-    boolean existsByRelationFromIdAndRelationTypeEquals(Long relationFrom, RelationType type);
-
+    boolean existsByRelationFromIdAndRelationTypeEquals(Long firstParentId, RelationType spouse);
 }

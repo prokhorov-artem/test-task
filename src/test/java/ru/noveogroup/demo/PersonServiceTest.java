@@ -5,6 +5,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -230,7 +232,7 @@ public class PersonServiceTest {
     }
 
     @Test
-    public void testConcurrentForMarriage() throws URISyntaxException, InterruptedException {
+    public void testConcurrentForMarriage() throws URISyntaxException {
 
         String url = "http://localhost:8070/people/relationships";
         final URI uri = new URI(url);
@@ -243,9 +245,10 @@ public class PersonServiceTest {
             .firstPerson(4L)
             .secondPerson(7L)
             .build());
+        ExecutorService service = Executors.newFixedThreadPool(2);
+
         for (MarriageDto dto : dtos) {
-            Thread.sleep(1000L);
-            new Thread(() -> {
+            service.execute(() -> {
                 HttpEntity<MarriageDto> request = new HttpEntity<>(dto);
                 ResponseEntity<Object> exchange = testRestTemplate.exchange(
                     uri,
@@ -253,10 +256,12 @@ public class PersonServiceTest {
                     request,
                     Object.class);
                 System.out.println(exchange.getStatusCode());
-            }).start();
+                System.out.println(exchange.getBody());
+            });
         }
-
-        Thread.sleep(5000L);
+        while (!service.isTerminated()) {
+            service.shutdown();
+        }
     }
 }
 

@@ -34,7 +34,10 @@ public class PeopleController {
 
     @PostMapping("/relationships")
     public ResponseEntity<Object> addMarriage(@RequestBody @Valid MarriageDto marriageDto) {
-        personService.addMarriage(marriageDto);
-        return ResponseEntity.ok().build();
+        if (personService.addMarriage(marriageDto)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
