@@ -21,11 +21,14 @@ public class MethodArgumentNotValidExceptionHandler {
     public List<CustomError> methodArgumentNotValidException(MethodArgumentNotValidException ex) {
         List<CustomError> errors = new ArrayList<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
-            errors.add(CustomError.builder()
+            CustomError customError = CustomError.builder()
                 .errorMessage(error.getDefaultMessage())
-                .fieldName(((FieldError) error).getField())
-                .rejectedValue(((FieldError) error).getRejectedValue())
-                .build());
+                .build();
+            if (error instanceof FieldError) {
+                customError.setFieldName(((FieldError) error).getField());
+                customError.setRejectedValue(((FieldError) error).getRejectedValue());
+            }
+            errors.add(customError);
         });
         return errors;
     }

@@ -1,11 +1,11 @@
 package ru.noveogroup.demo.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public interface DateService {
 
-    Date convert(String stringDate);
+    LocalDate convert(String stringDate);
 
-    String convert(Date date);
+    String convert(LocalDate date);
 
 }

@@ -33,7 +33,8 @@ public class PeopleController {
     }
 
     @PostMapping("/relationships")
-    public void addMarriage(@RequestBody @Valid MarriageDto marriageDto) {
+    public ResponseEntity<Object> addMarriage(@RequestBody @Valid MarriageDto marriageDto) {
         personService.addMarriage(marriageDto);
+        return ResponseEntity.ok().build();
     }
 }

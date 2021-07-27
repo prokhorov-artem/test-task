@@ -1,7 +1,7 @@
 package ru.noveogroup.demo.service.impl;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.noveogroup.demo.service.DateService;
@@ -13,18 +13,17 @@ public class DateServiceImpl implements DateService {
     public static final String DATE_PATTERN = "dd-MM-yyyy";
 
     @Override
-    public Date convert(String stringDate) {
+    public LocalDate convert(String stringDate) {
         try {
-            return new SimpleDateFormat(DATE_PATTERN).parse(stringDate);
+            return LocalDate.from(DateTimeFormatter.ofPattern(DATE_PATTERN).parse(stringDate));
         } catch (Exception e) {
             log.error("Can't parse date: {}", stringDate);
-            e.printStackTrace();
         }
         return null;
     }
 
     @Override
-    public String convert(Date date) {
-        return date == null ? null : new SimpleDateFormat(DATE_PATTERN).format(date);
+    public String convert(LocalDate date) {
+        return date == null ? null : DateTimeFormatter.ofPattern(DATE_PATTERN).format(date);
     }
 }

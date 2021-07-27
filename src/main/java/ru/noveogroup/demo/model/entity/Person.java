@@ -1,6 +1,6 @@
 package ru.noveogroup.demo.model.entity;
 
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,7 +28,7 @@ public class Person {
     private String name;
 
     @Column(columnDefinition = "DATE")
-    private Date birthDate;
+    private LocalDate birthDate;
 
     private String birthPlace;
 

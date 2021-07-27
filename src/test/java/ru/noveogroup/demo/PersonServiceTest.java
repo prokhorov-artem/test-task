@@ -1,5 +1,7 @@
 package ru.noveogroup.demo;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +12,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import ru.noveogroup.demo.model.RelationType;
 import ru.noveogroup.demo.model.dto.MarriageDto;
@@ -23,7 +29,8 @@ import ru.noveogroup.demo.repository.RelationshipRepository;
 import ru.noveogroup.demo.service.DateService;
 import ru.noveogroup.demo.service.PersonService;
 
-@SpringBootTest(classes = {TestTaskApplication.class, H2JpaConfig.class})
+@SpringBootTest(classes = {TestTaskApplication.class, H2JpaConfig.class}, webEnvironment =
+    SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ActiveProfiles("test")
 public class PersonServiceTest {
 
@@ -41,6 +48,9 @@ public class PersonServiceTest {
 
     @Autowired
     private DateService dateService;
+
+    @Autowired
+    private TestRestTemplate testRestTemplate;
 
     private Long personId;
     private Long firstParentId;
@@ -66,10 +76,15 @@ public class PersonServiceTest {
             .name("spouse")
             .birthPlace("test")
             .build();
+        Person personForConcurrent = Person.builder()
+            .name("personForConcurrent")
+            .birthPlace("test")
+            .build();
         personId = personRepository.save(person).getId();
         firstParentId = personRepository.save(firstParent).getId();
         secondParentId = personRepository.save(secondParent).getId();
         personRepository.save(spouse);
+        personRepository.save(personForConcurrent);
         Relationship personWithFirstParent = Relationship.builder()
             .relationFrom(person)
             .relationTo(firstParent)
@@ -88,6 +103,12 @@ public class PersonServiceTest {
             .relationType(RelationType.SPOUSE)
             .build();
         relationships.add(personWithSpouse);
+        Relationship spouseWithPerson = Relationship.builder()
+            .relationFrom(spouse)
+            .relationTo(person)
+            .relationType(RelationType.SPOUSE)
+            .build();
+        relationships.add(spouseWithPerson);
         relationshipRepository.saveAll(relationships);
     }
 
@@ -208,4 +229,34 @@ public class PersonServiceTest {
             .existsByRelationFromIdAndRelationTypeEquals(secondParentId, RelationType.SPOUSE));
     }
 
+    @Test
+    public void testConcurrentForMarriage() throws URISyntaxException, InterruptedException {
+
+        String url = "http://localhost:8070/people/relationships";
+        final URI uri = new URI(url);
+        List<MarriageDto> dtos = new ArrayList<>();
+        dtos.add(MarriageDto.builder()
+            .firstPerson(4L)
+            .secondPerson(5L)
+            .build());
+        dtos.add(MarriageDto.builder()
+            .firstPerson(4L)
+            .secondPerson(7L)
+            .build());
+        for (MarriageDto dto : dtos) {
+            Thread.sleep(1000L);
+            new Thread(() -> {
+                HttpEntity<MarriageDto> request = new HttpEntity<>(dto);
+                ResponseEntity<Object> exchange = testRestTemplate.exchange(
+                    uri,
+                    HttpMethod.POST,
+                    request,
+                    Object.class);
+                System.out.println(exchange.getStatusCode());
+            }).start();
+        }
+
+        Thread.sleep(5000L);
+    }
 }
+
